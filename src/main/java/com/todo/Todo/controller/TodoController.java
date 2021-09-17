@@ -23,7 +23,7 @@ public class TodoController {
     @Autowired
     private TagRepository tagRepo;
 
-    @GetMapping("/")
+    @GetMapping({"/", "index.html"})
     public String index(Model model) {
         model.addAttribute("todo", new Todo());
         return "index";
@@ -46,6 +46,16 @@ public class TodoController {
     @PostMapping("/addTag")
     public String addTag(Tag tag){
         tagRepo.save(tag);
+        return "redirect:/";
+    }
+
+    @GetMapping("/edit")
+    public String editTodo(Model model, Todo todo){
+        return "editTodo";
+    }
+
+    @PostMapping("/editTodo")
+    public String editTodo( Todo todo){
         return "redirect:/";
     }
 
