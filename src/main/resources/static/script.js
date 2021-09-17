@@ -48,3 +48,7 @@ function drag(ev) {
                 editButton.style.display = "block";
             }
         }
+
+        function test(){
+            document.getElementById("task1").innerHTML = "hihi";
+        }

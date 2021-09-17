@@ -1,23 +1,50 @@
 package com.todo.Todo.entity;
 
-import org.springframework.data.annotation.Id;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import java.io.File;
-import java.util.Date;
 
+@DynamicUpdate
 @Entity
+@Table(name = "todos")
 public class Todo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
-    private Date createdAt, dueAt;
+    private String createdAt;
+    private String dueAt;
     private String description;
-    private boolean done;
     private File attachedFile;
-    private String color;
+    private Long tagId;
+    private String currentState;
+    public enum State {OPEN, WORKING, DONE};
+
+    public Todo() {
+
+    }
+    public Todo(String title, String createdAt, String dueAt, String description, File attachedFile, Long tagId, String currentState) {
+        super();
+        this.title = title;
+        this.createdAt = createdAt;
+        this.dueAt = dueAt;
+        this.description = description;
+        this.attachedFile = attachedFile;
+        this.tagId = tagId;
+        this.currentState = currentState;
+    }
+
+
+
+    public String getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(String currentState) {
+        this.currentState = currentState;
+    }
 
     public Long getId() {
         return id;
@@ -31,19 +58,19 @@ public class Todo {
         this.title = title;
     }
 
-    public Date getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getDueAt() {
+    public String getDueAt() {
         return dueAt;
     }
 
-    public void setDueAt(Date dueAt) {
+    public void setDueAt(String dueAt) {
         this.dueAt = dueAt;
     }
 
@@ -55,13 +82,6 @@ public class Todo {
         this.description = description;
     }
 
-    public boolean isDone() {
-        return done;
-    }
-
-    public void setDone(boolean done) {
-        this.done = done;
-    }
 
     public File getAttachedFile() {
         return attachedFile;
@@ -69,5 +89,13 @@ public class Todo {
 
     public void setAttachedFile(File attachedFile) {
         this.attachedFile = attachedFile;
+    }
+
+    public Long getTagId() {
+        return tagId;
+    }
+
+    public void setTagId(Long tagId) {
+        this.tagId = tagId;
     }
 }
