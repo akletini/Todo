@@ -7,8 +7,8 @@ import com.todo.Todo.entity.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -23,9 +23,12 @@ public class TodoController {
     @Autowired
     private TagRepository tagRepo;
 
+    private long lastEditedPost;
+
     @GetMapping({"/", "index.html"})
     public String index(Model model) {
         model.addAttribute("todo", new Todo());
+        model.addAttribute("todos", getAllTodos());
         return "index";
     }
 
@@ -43,19 +46,32 @@ public class TodoController {
         return "redirect:/";
     }
 
+
+    @GetMapping("/deleteTodo/{id}")
+    public String deleteTodo(@PathVariable long id){
+        repo.deleteById(id);
+        return "redirect:/";
+    }
+
     @PostMapping("/addTag")
     public String addTag(Tag tag){
         tagRepo.save(tag);
         return "redirect:/";
     }
 
-    @GetMapping("/edit")
-    public String editTodo(Model model, Todo todo){
+    @GetMapping("/editTodo/{id}")
+    public String editTodo(Model model, @PathVariable Long id){
+        Optional<Todo> todoOpt = repo.findById(id);
+        Todo todo = todoOpt.get();
+        model.addAttribute("todo",todo );
+        lastEditedPost = todo.getId();
         return "editTodo";
     }
 
     @PostMapping("/editTodo")
-    public String editTodo( Todo todo){
+    public String editTodo(Todo todo, @RequestParam("file") MultipartFile image){
+        todo.setId(lastEditedPost);
+        repo.save(todo);
         return "redirect:/";
     }
 
@@ -68,7 +84,7 @@ public class TodoController {
     public List<Todo> filterTodosByTag(List<Todo> todos, Tag tag){
         List<Todo> filteredList = new ArrayList<>();
         for(Todo todo : todos){
-            if(todo.getTagId() == tag.getId()){
+            if(todo.getTagId().equals(tag.getId())){
                 filteredList.add(todo);
             }
         }
