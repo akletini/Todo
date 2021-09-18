@@ -20,26 +20,7 @@
   <link rel="stylesheet" href="styles.css" />
   <title>Todo</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script type="text/javascript">
-    Date.prototype.toDateInputValue = function () {
-      var local = new Date(this);
-      local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
-      return local.toJSON().slice(0, 10);
-    };
-
-    $(document).ready(function setDatefield() {
-      document.getElementById("datepicker").defaultValue =
-        new Date().toDateInputValue();
-    });
-
-    function sortList(selectedIndex) {
-      if (selectedIndex.value == 1) {
-        window.location.replace("/sortByCreationDate");
-      } else if (selectedIndex.value == 2) {
-        window.location.replace("/sortByDueDate");
-      }
-    }
-  </script>
+  <script type="text/javascript" src="/script.js"></script>
 </head>
 <body>
   <section class="vh-50">
@@ -121,16 +102,23 @@
                   class="form-select form-select-sm w-auto"
                   style="margin-right: 10px"
                 >
-                  <option value="1">Uni</option>
-                  <option value="2">Work</option>
-                  <option value="3">Band</option>
+                  <option value="1" th:selected="${tag == 1}">Alle</option>
+                  <option value="2" th:selected="${tag == 2}">Uni</option>
+                  <option value="3" th:selected="${tag == 3}">Work</option>
+                  <option value="4" th:selected="${tag == 4}">Band</option>
                 </select>
                 <p class="small mb-0 me-2 text-muted">Filter</p>
-                <select class="form-select form-select-sm w-auto">
-                  <option value="1">All</option>
-                  <option value="2">Completed</option>
-                  <option value="3">Active</option>
-                  <option value="4">Has due date</option>
+                <select
+                  class="form-select form-select-sm w-auto"
+                  id="filter"
+                  name="filter"
+                  onchange="filterByState(this)"
+                >
+                  <option value="1" th:selected="${filter == 1}">Active</option>
+                  <option value="2" th:selected="${filter == 2}">
+                    Completed
+                  </option>
+                  <option value="3" th:selected="${filter == 3}">Is due</option>
                 </select>
                 <p class="small mb-0 ms-4 me-2 text-muted">Sort</p>
                 <select
@@ -142,7 +130,7 @@
                   <option value="1" th:selected="${sort == 1}">
                     Added date
                   </option>
-                  <option value="2" th:selected="${sort == 2}">Due date</option>
+                  <option value="2" th:selected="${sort == 2}">Is due</option>
                 </select>
                 <a
                   href="#!"

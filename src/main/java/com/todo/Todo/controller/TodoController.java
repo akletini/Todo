@@ -26,8 +26,10 @@ public class TodoController {
     private Todo lastEditedTodo;
     private boolean listHasBeenAltered = false;
     private List<Todo> allTodos;
+    private List<Todo> filteredList;
 
     private int currentSort = 1;
+    private int currentFilter = 1;
 
     @GetMapping({"/", "index.html"})
     public String index(Model model) {
@@ -35,11 +37,47 @@ public class TodoController {
         if(!listHasBeenAltered) {
             allTodos = getAllOpenTodos();
         }
-        model.addAttribute("todos", allTodos);
+
+        if(currentFilter == 1) {
+            model.addAttribute("todos", allTodos);
+        } else {
+            model.addAttribute("todos", filteredList);
+        }
         model.addAttribute("sort" , currentSort);
+        model.addAttribute("filter" , currentFilter);
         return "index";
     }
 
+    // Filter endpoints
+    @GetMapping("/filterByActive")
+    public String filterByActive(Model model) {
+        filteredList = filterByActive();
+        model.addAttribute("todo", new Todo());
+        model.addAttribute("todos", filteredList);
+        currentFilter = 1;
+        return "redirect:/";
+    }
+
+    @GetMapping("/filterByCompleted")
+    public String filterByCompleted(Model model) {
+        filteredList = filterByCompleted();
+        model.addAttribute("todo", new Todo());
+        model.addAttribute("todos", filteredList);
+        currentFilter = 2;
+        return "redirect:/";
+    }
+
+    @GetMapping("/filterByIsDue")
+    public String filterByIsDue(Model model) {
+        filteredList = filterByIsDue(allTodos);
+        model.addAttribute("todo", new Todo());
+        model.addAttribute("todos", filteredList);
+        currentFilter = 3;
+        return "redirect:/";
+    }
+
+
+    // Sorting endpoint
     @GetMapping("/sortByDueDate")
     public String sortByDueDate(Model model) {
         model.addAttribute("todo", new Todo());
@@ -60,6 +98,8 @@ public class TodoController {
         return "redirect:/";
     }
 
+
+    // CRUD endpoints
     @PostMapping("/addTodo")
     public String addTodo(Todo todo) {
         Todo cloneTodo = new Todo();
@@ -71,6 +111,7 @@ public class TodoController {
         cloneTodo.setCurrentState(Todo.State.OPEN.toString());
         cloneTodo.setDueAt(todo.getDueAt());
         Todo savedTodo = repo.save(cloneTodo);
+        listHasBeenAltered = false;
         return "redirect:/";
     }
 
@@ -109,6 +150,8 @@ public class TodoController {
     public String editTodo(Todo todo, @RequestParam("file") MultipartFile image) {
         todo.setId(lastEditedTodo.getId());
         todo.setCreatedAt(lastEditedTodo.getCreatedAt());
+        todo.setCurrentState(lastEditedTodo.getCurrentState());
+
         repo.save(todo);
         return "redirect:/";
     }
@@ -165,5 +208,39 @@ public class TodoController {
             }
         });
         return todos;
+    }
+
+    public List<Todo> filterByActive(){
+        List<Todo> todos = getAllOpenTodos();
+        List<Todo> returnList = new ArrayList<>();
+        for(Todo t : todos){
+            if(t.getCurrentState().equals("OPEN")){
+                returnList.add(t);
+            }
+        }
+        return returnList;
+    }
+
+    public List<Todo> filterByCompleted(){
+        List<Todo> allTodos = (ArrayList<Todo>) repo.findAll();
+        List<Todo> returnList = new ArrayList<>();
+        for(Todo t : allTodos){
+            if(t.getCurrentState().equals("DONE")){
+                returnList.add(t);
+            }
+        }
+        return returnList;
+    }
+
+    public List<Todo> filterByIsDue(List<Todo> todos){
+        List<Todo> returnList = new ArrayList<>();
+        for(Todo t : todos){
+            LocalDate dueDate = LocalDate.parse(t.getDueAt());
+            LocalDate currentDate = LocalDate.now();
+            if(dueDate.compareTo(currentDate) <= 0){
+                returnList.add(t);
+            }
+        }
+        return returnList;
     }
 }
