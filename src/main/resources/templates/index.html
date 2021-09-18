@@ -17,10 +17,21 @@
     integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ"
     crossorigin="anonymous"
   />
-  <link rel="stylesheet" href="css/styles.css" />
-
+  <link rel="stylesheet" href="styles.css" />
   <title>Todo</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript">
+    Date.prototype.toDateInputValue = function () {
+      var local = new Date(this);
+      local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+      return local.toJSON().slice(0, 10);
+    };
+
+    $(document).ready(function setDatefield() {
+      document.getElementById("datepicker").defaultValue =
+        new Date().toDateInputValue();
+    });
+  </script>
 </head>
 <body>
   <section class="vh-50">
@@ -34,7 +45,7 @@
           >
             <div class="card-body py-4 px-4 px-md-5">
               <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
-                <a href="/index.html">
+                <a href="/">
                   <i class="fas fa-check-square me-1"></i>
                   <u>My Todo-s</u>
                 </a>
@@ -61,8 +72,8 @@
                         />
                         <input
                           type="date"
-                          placeholder=""
-                          onfocus="(this.type='date')"
+                          class="datepicker"
+                          id="datepicker"
                           data-mdb-toggle="tooltip"
                           title="Set due date"
                           style="margin-left: 5px"
@@ -71,7 +82,7 @@
                         <div>
                           <button
                             type="submit"
-                            class="btn btn-primary"
+                            class="btn btn-newTag"
                             style="margin-left: 10px"
                           >
                             Add
@@ -95,7 +106,7 @@
                   pb-3
                 "
               >
-                <button class="btn" style="margin-right: 10px">New tag</button>
+                <button class="btn btn-newTag">New tag</button>
                 <p class="small mb-0 me-2 text-muted">Tags</p>
                 <select class="select" style="margin-right: 10px">
                   <option value="1">Uni</option>
@@ -128,6 +139,7 @@
                   list-group list-group-horizontal
                   rounded-0
                   bg-transparent
+                  todoEntry
                 "
                 th:each="todo: ${todos}"
                 th:inline="text"
@@ -194,7 +206,7 @@
                     "
                     th:if="${todo.dueAt != ''}"
                   >
-                    <p class="small mb-0">
+                    <p class="small mb-0 text-in-warning">
                       <i class="fas fa-hourglass-half me-2 text-warning"></i>
                       [[${todo.dueAt}]]
                     </p>
@@ -263,4 +275,5 @@
       </div>
     </div>
   </section>
+  <script onload="setDateField()"></script>
 </body>

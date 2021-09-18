@@ -8,3 +8,53 @@
 #list1 .select-input.form-control[readonly]:not([disabled]) {
   background-color: #fbfbfb;
 }
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: rgb(41, 37, 37);
+    color: #e4e4e4;
+  }
+
+  .card-body {
+    background-color: rgb(75, 67, 67);
+    border-radius: 10px !important;
+    border: 0ch;
+  }
+  a {
+    color: #ffffff;
+  }
+  img {
+    filter: grayscale(30%);
+  }
+
+  .text-muted {
+    color: #e4e4e4 !important;
+  }
+
+  .text-in-warning {
+    color: black !important;
+  }
+
+  .btn-newTag {
+    margin-right: 10px;
+    color: #eff1f2;
+    border: 2px solid #e4e4e4;
+    border-radius: 12px;
+  }
+
+  .datepicker {
+    height: 49px;
+    border-radius: 5px;
+  }
+
+  p {
+    color: #e4e4e4;
+  }
+
+  .todoEntry {
+    background-color: rgb(75, 67, 67);
+    margin-bottom: 30px;
+    outline: 2px solid #e4e4e4;
+    outline-offset: 14px;
+  }
+}
