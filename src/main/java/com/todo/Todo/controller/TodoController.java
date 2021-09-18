@@ -10,7 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -34,7 +33,7 @@ public class TodoController {
     public String index(Model model) {
         model.addAttribute("todo", new Todo());
         if(!listHasBeenAltered) {
-            allTodos = getAllTodos();
+            allTodos = getAllOpenTodos();
         }
         model.addAttribute("todos", allTodos);
         model.addAttribute("sort" , currentSort);
@@ -75,10 +74,19 @@ public class TodoController {
         return "redirect:/";
     }
 
+    @GetMapping("/completeTodo/{id}")
+    public String completeTodo(@PathVariable long id) {
+        Todo todo = repo.findById(id).get();
+        todo.setCurrentState(Todo.State.DONE.toString());
+        repo.save(todo);
+        listHasBeenAltered = false;
+        return "redirect:/";
+    }
 
     @GetMapping("/deleteTodo/{id}")
     public String deleteTodo(@PathVariable long id) {
         repo.deleteById(id);
+        listHasBeenAltered = false;
         return "redirect:/";
     }
 
@@ -107,8 +115,15 @@ public class TodoController {
 
     /* Queries */
 
-    public List<Todo> getAllTodos() {
-        return (ArrayList<Todo>) repo.findAll();
+    public List<Todo> getAllOpenTodos() {
+        List<Todo> allTodos = (ArrayList<Todo>) repo.findAll();
+        List<Todo> openTodos = new ArrayList<>();
+        for(Todo todo : allTodos){
+            if(todo.getCurrentState().equals("OPEN")){
+                openTodos.add(todo);
+            }
+        }
+        return openTodos;
     }
 
     public List<Todo> filterTodosByTag(List<Todo> todos, Tag tag) {
@@ -136,9 +151,6 @@ public class TodoController {
                 return (date1.compareTo(date2));
             }
         });
-        for(Todo todo : todos){
-            System.out.println("created " + todo.getCreatedAt());
-        }
         return todos;
     }
 
@@ -152,10 +164,6 @@ public class TodoController {
                 return localDate1.compareTo(localDate2);
             }
         });
-
-        for(Todo todo : todos){
-            System.out.println("due " + todo.getDueAt());
-        }
         return todos;
     }
 }

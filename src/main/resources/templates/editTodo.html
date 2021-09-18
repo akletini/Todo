@@ -73,19 +73,23 @@
                   </div>
                   <p style="margin-top: 10px"></p>
                   <label for="tags">Tags: </label>
-                  <select id="tags" name="tags">
-                    <option value="volvo">Uni</option>
-                    <option value="saab">Work</option>
-                    <option value="fiat">Band</option>
+                  <select
+                    id="tags"
+                    name="tags"
+                    class="form-select form-select-sm w-auto"
+                  >
+                    <option value="1">Uni</option>
+                    <option value="2">Work</option>
+                    <option value="3">Band</option>
                   </select>
                   <p style="margin-top: 10px"></p>
-                  <div class="form-group">
+                  <div class="form-group custom-file">
                     <label for="uploadField">File upload</label><br />
                     <input
                       type="file"
                       name="file"
                       accept="image/x-png,image/jpeg,image/jpg"
-                      class="form-control-file"
+                      class="form-control"
                       id="uploadField"
                     />
                   </div>

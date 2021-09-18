@@ -20,7 +20,7 @@ public class Todo {
     private File attachedFile;
     private Long tagId;
     private String currentState;
-    public enum State {OPEN, WORKING, DONE};
+    public enum State {OPEN, DONE};
 
     public Todo() {
 
