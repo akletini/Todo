@@ -31,6 +31,14 @@
       document.getElementById("datepicker").defaultValue =
         new Date().toDateInputValue();
     });
+
+    function sortList(selectedIndex) {
+      if (selectedIndex.value == 1) {
+        window.location.replace("/sortByCreationDate");
+      } else if (selectedIndex.value == 2) {
+        window.location.replace("/sortByDueDate");
+      }
+    }
   </script>
 </head>
 <body>
@@ -42,6 +50,7 @@
             class="card"
             id="list1"
             style="border-radius: 0.75rem; background-color: #eff1f2"
+            th:fragment="list1"
           >
             <div class="card-body py-4 px-4 px-md-5">
               <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
@@ -108,22 +117,32 @@
               >
                 <button class="btn btn-newTag">New tag</button>
                 <p class="small mb-0 me-2 text-muted">Tags</p>
-                <select class="select" style="margin-right: 10px">
+                <select
+                  class="form-select form-select-sm w-auto"
+                  style="margin-right: 10px"
+                >
                   <option value="1">Uni</option>
                   <option value="2">Work</option>
                   <option value="3">Band</option>
                 </select>
                 <p class="small mb-0 me-2 text-muted">Filter</p>
-                <select class="select">
+                <select class="form-select form-select-sm w-auto">
                   <option value="1">All</option>
                   <option value="2">Completed</option>
                   <option value="3">Active</option>
                   <option value="4">Has due date</option>
                 </select>
                 <p class="small mb-0 ms-4 me-2 text-muted">Sort</p>
-                <select class="select">
-                  <option value="1">Added date</option>
-                  <option value="2">Due date</option>
+                <select
+                  class="form-select form-select-sm w-auto"
+                  id="sort"
+                  name="sort"
+                  onchange="sortList(this)"
+                >
+                  <option value="1" th:selected="${sort == 1}">
+                    Added date
+                  </option>
+                  <option value="2" th:selected="${sort == 2}">Due date</option>
                 </select>
                 <a
                   href="#!"
@@ -180,7 +199,10 @@
                     bg-transparent
                   "
                 >
-                  <p class="lead fw-normal mb-0">[[${todo.title}]]</p>
+                  <a
+                    th:onclick="'location.href=\'/editTodo/' + ${todo.id} + '\''"
+                    ><p class="lead fw-normal mb-0">[[${todo.title}]]</p></a
+                  >
                 </li>
                 <li
                   class="
@@ -241,7 +263,6 @@
                   </div>
                   <div class="text-end text-muted">
                     <a
-                      href="#!"
                       class="text-muted"
                       data-mdb-toggle="tooltip"
                       title="Created date"
