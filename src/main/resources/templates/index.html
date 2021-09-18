@@ -57,6 +57,7 @@
                           id="exampleFormControlInput1"
                           placeholder="Add new..."
                           th:field="*{title}"
+                          required
                         />
                         <input
                           type="date"
@@ -172,6 +173,36 @@
                 <li
                   class="
                     list-group-item
+                    px-3
+                    py-1
+                    d-flex
+                    align-items-center
+                    border-0
+                    bg-transparent
+                  "
+                >
+                  <div
+                    class="
+                      py-2
+                      px-3
+                      me-2
+                      border border-warning
+                      rounded-3
+                      d-flex
+                      align-items-center
+                      bg-light
+                    "
+                    th:if="${todo.dueAt != ''}"
+                  >
+                    <p class="small mb-0">
+                      <i class="fas fa-hourglass-half me-2 text-warning"></i>
+                      [[${todo.dueAt}]]
+                    </p>
+                  </div>
+                </li>
+                <li
+                  class="
+                    list-group-item
                     ps-3
                     pe-0
                     py-1
@@ -204,7 +235,8 @@
                       title="Created date"
                     >
                       <p class="small mb-0">
-                        <i class="fas fa-info-circle me-2"></i>28th Jun 2020
+                        <i class="fas fa-info-circle me-2"></i
+                        >[[${todo.createdAt}]]
                       </p></a
                     >
                   </div>

@@ -23,7 +23,7 @@ public class TodoController {
     @Autowired
     private TagRepository tagRepo;
 
-    private long lastEditedPost;
+    private Todo lastEditedTodo;
 
     @GetMapping({"/", "index.html"})
     public String index(Model model) {
@@ -64,13 +64,14 @@ public class TodoController {
         Optional<Todo> todoOpt = repo.findById(id);
         Todo todo = todoOpt.get();
         model.addAttribute("todo",todo );
-        lastEditedPost = todo.getId();
+        lastEditedTodo = todo;
         return "editTodo";
     }
 
     @PostMapping("/editTodo")
     public String editTodo(Todo todo, @RequestParam("file") MultipartFile image){
-        todo.setId(lastEditedPost);
+        todo.setId(lastEditedTodo.getId());
+        todo.setCreatedAt(lastEditedTodo.getCreatedAt());
         repo.save(todo);
         return "redirect:/";
     }
