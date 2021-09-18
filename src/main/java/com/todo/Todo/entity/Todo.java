@@ -18,21 +18,27 @@ public class Todo {
     private String dueAt;
     private String description;
     private File attachedFile;
-    private Long tagId;
+    @OneToOne
+    @JoinColumns({
+            @JoinColumn(name="tag_id", referencedColumnName = "ID"),
+            @JoinColumn(name="tag_name", referencedColumnName = "NAME"),
+            @JoinColumn(name="tag_color", referencedColumnName = "COLOR")
+    })
+    private Tag tag;
     private String currentState;
     public enum State {OPEN, DONE};
 
     public Todo() {
 
     }
-    public Todo(String title, String createdAt, String dueAt, String description, File attachedFile, Long tagId, String currentState) {
+    public Todo(String title, String createdAt, String dueAt, String description, File attachedFile, Tag tag, String currentState) {
         super();
         this.title = title;
         this.createdAt = createdAt;
         this.dueAt = dueAt;
         this.description = description;
         this.attachedFile = attachedFile;
-        this.tagId = tagId;
+        this.tag = tag;
         this.currentState = currentState;
     }
 
@@ -84,7 +90,6 @@ public class Todo {
         this.description = description;
     }
 
-
     public File getAttachedFile() {
         return attachedFile;
     }
@@ -93,11 +98,11 @@ public class Todo {
         this.attachedFile = attachedFile;
     }
 
-    public Long getTagId() {
-        return tagId;
+    public Tag getTag() {
+        return tag;
     }
 
-    public void setTagId(Long tagId) {
-        this.tagId = tagId;
+    public void setTag(Tag tag) {
+        this.tag = tag;
     }
 }

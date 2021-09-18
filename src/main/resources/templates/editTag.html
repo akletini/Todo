@@ -35,68 +35,35 @@
           <div class="card-body">
             <div class="row justify-content-center">
               <div class="col-sm-6">
-                <h3 class="text-center my-4">Edit Todo</h3>
+                <h3 class="text-center my-4">New Tag</h3>
                 <form
                   method="POST"
                   action="#"
                   enctype="multipart/form-data"
-                  th:object="${todo}"
-                  th:action="@{~/editTodo}"
+                  th:object="${tag}"
+                  th:action="@{~/editTag}"
                 >
                   <div class="form-group">
-                    <label for="dateField">Due Date</label>
-                    <input
-                      type="date"
-                      class="form-control"
-                      id="dateField"
-                      placeholder="01.01.2021"
-                      th:field="*{dueAt}"
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label for="titleField">Title</label>
+                    <label for="titleField">Name</label>
                     <input
                       type="text"
                       class="form-control"
                       id="titleField"
-                      th:field="*{title}"
+                      th:field="*{name}"
                     />
                   </div>
-                  <div class="form-group">
-                    <label for="descriptionField">Description</label>
-                    <textarea
-                      class="form-control"
-                      th:field="*{description}"
-                      id="descriptionField"
-                      rows="3"
-                    ></textarea>
-                  </div>
                   <p style="margin-top: 10px"></p>
-                  <label for="tags">Tags: </label>
-                  <select
-                    id="tags"
-                    name="tags"
-                    class="form-select form-select-sm"
-                    th:field="*{tag}"
+                  <label for="exampleColorInput" class="form-label"
+                    >Color picker</label
                   >
-                    <option value="0">None</option>
-                    <option
-                      th:each="tag: ${tags}"
-                      th:text="${tag.name}"
-                      th:value="${tag.id}"
-                    ></option>
-                  </select>
-                  <p style="margin-top: 10px"></p>
-                  <div class="form-group custom-file">
-                    <label for="uploadField">File upload</label><br />
-                    <input
-                      type="file"
-                      name="file"
-                      accept="image/x-png,image/jpeg,image/jpg"
-                      class="form-control"
-                      id="uploadField"
-                    />
-                  </div>
+                  <input
+                    type="color"
+                    class="form-control form-control-color"
+                    id="exampleColorInput"
+                    value="#563d7c"
+                    title="Choose your color"
+                    th:field="*{color}"
+                  />
                   <p style="margin-top: 20px"></p>
                   <div class="center">
                     <button type="submit" class="btn btn-newTag">Save</button>

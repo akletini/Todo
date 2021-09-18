@@ -3,11 +3,12 @@ package com.todo.Todo.entity;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @DynamicUpdate
 @Entity
 @Table(name = "tags")
-public class Tag {
+public class Tag implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -45,7 +45,20 @@ public class TodoController {
         }
         model.addAttribute("sort" , currentSort);
         model.addAttribute("filter" , currentFilter);
+        model.addAttribute("tags", tagRepo.findAll());
         return "index";
+    }
+
+    @GetMapping("/editTag")
+    public String editTag(Model model){
+        model.addAttribute("tag", new Tag());
+        return "editTag";
+    }
+
+    @PostMapping("/editTag")
+    public String editTagPost(Model model, Tag tag){
+        tagRepo.save(tag);
+        return "redirect:/";
     }
 
     // Filter endpoints
@@ -142,6 +155,7 @@ public class TodoController {
         Optional<Todo> todoOpt = repo.findById(id);
         Todo todo = todoOpt.get();
         model.addAttribute("todo", todo);
+        model.addAttribute("tags", tagRepo.findAll());
         lastEditedTodo = todo;
         return "editTodo";
     }
@@ -172,7 +186,7 @@ public class TodoController {
     public List<Todo> filterTodosByTag(List<Todo> todos, Tag tag) {
         List<Todo> filteredList = new ArrayList<>();
         for (Todo todo : todos) {
-            if (todo.getTagId().equals(tag.getId())) {
+            if (todo.getTag().getId().equals(tag.getId())) {
                 filteredList.add(todo);
             }
         }

@@ -96,16 +96,20 @@
                   pb-3
                 "
               >
-                <button class="btn btn-newTag">New tag</button>
+                <button class="btn btn-newTag">
+                  <a href="/editTag">New tag</a>
+                </button>
                 <p class="small mb-0 me-2 text-muted">Tags</p>
                 <select
                   class="form-select form-select-sm w-auto"
                   style="margin-right: 10px"
                 >
-                  <option value="1" th:selected="${tag == 1}">Alle</option>
-                  <option value="2" th:selected="${tag == 2}">Uni</option>
-                  <option value="3" th:selected="${tag == 3}">Work</option>
-                  <option value="4" th:selected="${tag == 4}">Band</option>
+                  <option value="0" th:selected="${tag == 1}">Alle</option>
+                  <option
+                    th:each="tag: ${tags}"
+                    th:text="${tag.name}"
+                    th:value="${tag.id}"
+                  ></option>
                 </select>
                 <p class="small mb-0 me-2 text-muted">Filter</p>
                 <select
@@ -191,6 +195,40 @@
                     th:onclick="'location.href=\'/editTodo/' + ${todo.id} + '\''"
                     ><p class="lead fw-normal mb-0">[[${todo.title}]]</p></a
                   >
+                </li>
+                <li
+                  class="
+                    list-group-item
+                    px-3
+                    py-1
+                    d-flex
+                    align-items-center
+                    border-0
+                    bg-transparent
+                  "
+                >
+                  <div
+                    class="
+                      py-2
+                      px-3
+                      me-2
+                      rounded-3
+                      d-flex
+                      align-items-center
+                      tagBorder
+                    "
+                    th:if="${todo.tag != null}"
+                  >
+                    <style th:inline="text">
+                      .tagBorder {
+                        background-color: [[${todo.tag.getColor()}]] !important;
+                        border: 1px solid black;
+                      }
+                    </style>
+                    <p class="small mb-0" style="color: #eff1f2">
+                      [[${todo.tag.getName()}]]
+                    </p>
+                  </div>
                 </li>
                 <li
                   class="
