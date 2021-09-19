@@ -26,3 +26,20 @@ Date.prototype.toDateInputValue = function () {
         window.location.replace("/filterByIsDue");
       }
   }
+
+  function filterByTag(selectedIndex){
+    window.location.replace("/tag/" + selectedIndex.value);
+  }
+
+
+  var isDarkMode = true;
+  function switchTheme(){
+    var css = document.getElementById("style");
+    if(!isDarkMode) {
+      css.disabled = undefined;
+      isDarkMode = true;
+    } else {
+      css.disabled = "disabled";
+      isDarkMode = false;
+    }
+  }

@@ -30,6 +30,7 @@ public class TodoController {
 
     private int currentSort = 1;
     private int currentFilter = 1;
+    private int currentTag = 0;
 
     @GetMapping({"/", "index.html"})
     public String index(Model model) {
@@ -39,12 +40,38 @@ public class TodoController {
         }
 
         if(currentFilter == 1) {
-            model.addAttribute("todos", allTodos);
-        } else {
+            filteredList = getAllOpenTodos();
             model.addAttribute("todos", filteredList);
+            if(currentTag != 0){
+                model.addAttribute("todos", filterTodosByTag(filteredList, currentTag));
+            }
+        } else if (currentFilter == 2){
+            filteredList = filterByCompleted();
+            if(currentTag == 0) {
+                model.addAttribute("todos", filteredList);
+            }
+            else {
+                model.addAttribute("todos", filterTodosByTag(filteredList, currentTag));
+            }
+        } else {
+            filteredList = filterByIsDue(allTodos);
+            if(currentTag == 0) {
+                model.addAttribute("todos", filteredList);
+            }
+            else {
+                model.addAttribute("todos", filterTodosByTag(filteredList, currentTag));
+            }
         }
+
+        if(currentSort == 1) {
+            sortByCreatedAt((List<Todo>) model.getAttribute("todos"));
+        } else {
+            sortByDueDate((List<Todo>) model.getAttribute("todos"));
+        }
+
         model.addAttribute("sort" , currentSort);
         model.addAttribute("filter" , currentFilter);
+        model.addAttribute("currentTag" , currentTag);
         model.addAttribute("tags", tagRepo.findAll());
         return "index";
     }
@@ -63,29 +90,29 @@ public class TodoController {
 
     // Filter endpoints
     @GetMapping("/filterByActive")
-    public String filterByActive(Model model) {
-        filteredList = filterByActive();
-        model.addAttribute("todo", new Todo());
-        model.addAttribute("todos", filteredList);
+    public String getFilterByActive() {
         currentFilter = 1;
         return "redirect:/";
     }
 
     @GetMapping("/filterByCompleted")
-    public String filterByCompleted(Model model) {
-        filteredList = filterByCompleted();
-        model.addAttribute("todo", new Todo());
-        model.addAttribute("todos", filteredList);
+    public String getFilterByCompleted() {
         currentFilter = 2;
         return "redirect:/";
     }
 
     @GetMapping("/filterByIsDue")
-    public String filterByIsDue(Model model) {
-        filteredList = filterByIsDue(allTodos);
+    public String getFilterByIsDue() {
+        currentFilter = 3;
+        return "redirect:/";
+    }
+
+    @GetMapping("/tag/{id}")
+    public String filterByIsDue(Model model, @PathVariable long id) {
+        filteredList = filterTodosByTag(allTodos, id);
         model.addAttribute("todo", new Todo());
         model.addAttribute("todos", filteredList);
-        currentFilter = 3;
+        currentTag = (int) id;
         return "redirect:/";
     }
 
@@ -165,7 +192,7 @@ public class TodoController {
         todo.setId(lastEditedTodo.getId());
         todo.setCreatedAt(lastEditedTodo.getCreatedAt());
         todo.setCurrentState(lastEditedTodo.getCurrentState());
-
+        replaceEditedItem((List<Todo>) repo.findAll(), todo);
         repo.save(todo);
         return "redirect:/";
     }
@@ -174,6 +201,7 @@ public class TodoController {
 
     public List<Todo> getAllOpenTodos() {
         List<Todo> allTodos = (ArrayList<Todo>) repo.findAll();
+        this.allTodos = allTodos;
         List<Todo> openTodos = new ArrayList<>();
         for(Todo todo : allTodos){
             if(todo.getCurrentState().equals("OPEN")){
@@ -183,10 +211,10 @@ public class TodoController {
         return openTodos;
     }
 
-    public List<Todo> filterTodosByTag(List<Todo> todos, Tag tag) {
+    public List<Todo> filterTodosByTag(List<Todo> todos, long tagId) {
         List<Todo> filteredList = new ArrayList<>();
         for (Todo todo : todos) {
-            if (todo.getTag().getId().equals(tag.getId())) {
+            if (todo.getTag() != null && todo.getTag().getId().equals(tagId)) {
                 filteredList.add(todo);
             }
         }
@@ -256,5 +284,16 @@ public class TodoController {
             }
         }
         return returnList;
+    }
+
+    public void replaceEditedItem(List<Todo> currentTodos, Todo editedTodo){
+        int todoIndex = 0;
+        for (Todo todo: currentTodos) {
+            if(todo.getId().equals(editedTodo.getId())){
+                break;
+            }
+            todoIndex++;
+        }
+        currentTodos.set(todoIndex, editedTodo);
     }
 }
