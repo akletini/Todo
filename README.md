@@ -15,6 +15,7 @@ Create a jar file by executing
 ```
 mvn install
 ```
+in the project directory.
 
 After that build the docker image by using
 
