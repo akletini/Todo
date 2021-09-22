@@ -69,6 +69,8 @@ public class TodoController {
             sortByDueDate((List<Todo>) model.getAttribute("todos"));
         }
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        model.addAttribute("currentDate", sdf.format(new Date()));
         model.addAttribute("sort" , currentSort);
         model.addAttribute("filter" , currentFilter);
         model.addAttribute("currentTag" , currentTag);

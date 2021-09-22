@@ -249,10 +249,28 @@
                       align-items-center
                       bg-light
                     "
-                    th:if="${todo.dueAt != ''}"
+                    th:if="${todo.dueAt} > ${currentDate}"
                   >
                     <p class="small mb-0 text-in-warning">
                       <i class="fas fa-hourglass-half me-2 text-warning"></i>
+                      [[${todo.dueAt}]]
+                    </p>
+                  </div>
+                  <div
+                    class="
+                      py-2
+                      px-3
+                      me-2
+                      border border-danger
+                      rounded-3
+                      d-flex
+                      align-items-center
+                      bg-light
+                    "
+                    th:if="${todo.dueAt} le ${currentDate}"
+                  >
+                    <p class="small mb-0 text-danger">
+                      <i class="fas fa-hourglass-half me-2 text-danger"></i>
                       [[${todo.dueAt}]]
                     </p>
                   </div>
