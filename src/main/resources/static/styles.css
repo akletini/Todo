@@ -11,12 +11,12 @@
 
 @media (prefers-color-scheme: dark) {
   body {
-    background-color: rgb(41, 37, 37);
+    background-color: rgba(49, 49, 49, 0.93);
     color: #e4e4e4;
   }
 
   .card-body {
-    background-color: rgb(75, 67, 67);
+    background-color: rgb(94, 94, 94);
     border-radius: 10px !important;
     border: 0ch;
   }
@@ -52,7 +52,7 @@
   }
 
   .todoEntry {
-    background-color: rgb(75, 67, 67);
+    background-color: rgb(17, 17, 17);
     margin-bottom: 30px;
     outline: 2px solid #e4e4e4;
     outline-offset: 14px;

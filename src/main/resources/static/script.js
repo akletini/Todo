@@ -31,6 +31,11 @@ Date.prototype.toDateInputValue = function () {
     window.location.replace("/tag/" + selectedIndex.value);
   }
 
+  function updateTagForTodo(todo, tag) {
+    var selectedIndex = tag.value;
+    window.location.replace("updateTag/" + todo + "/" + selectedIndex)
+  }
+
 
   var isDarkMode = true;
   function switchTheme(){

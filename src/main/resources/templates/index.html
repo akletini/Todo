@@ -17,6 +17,7 @@
     integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ"
     crossorigin="anonymous"
   />
+  <link rel="icon" href="/tick.png" />
   <link id="style" rel="stylesheet" href="styles.css" />
   <title>Todo</title>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -37,7 +38,7 @@
               <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
                 <a href="/">
                   <i class="fas fa-check-square me-1"></i>
-                  <u>My Todo-s</u>
+                  <u>My Todos</u>
                 </a>
                 <!-- <button
                   class="btn-toggle"
@@ -142,10 +143,10 @@
                   name="sort"
                   onchange="sortList(this)"
                 >
-                  <option value="1" th:selected="${sort == 1}">
+                  <option value="2" th:selected="${sort == 2}">
                     Added date
                   </option>
-                  <option value="2" th:selected="${sort == 2}">Is due</option>
+                  <option value="1" th:selected="${sort == 1}">Is due</option>
                 </select>
                 <a
                   href="#!"
@@ -225,6 +226,33 @@
                     <p class="small mb-0" style="color: #eff1f2">
                       [[${todo.tag.getName()}]]
                     </p>
+                  </div>
+                  <div
+                          class="
+                      py-2
+                      me-2
+                      rounded-3
+                      d-flex
+                      tagBorder
+                    "
+                          th:unless="${todo.tag != null}"
+                  >
+                  <select
+                          class="form-select form-select-sm w-auto"
+                          id="selectTag"
+                          name="selectTag"
+                          align="right justify"
+                          th:onchange="updateTagForTodo([[${todo.id}]],this)"
+                  >
+
+                    <option value="0" th:selected="${tag == 0}"></option>
+                    <option
+                            th:each="tag: ${tags}"
+                            th:text="${tag.name}"
+                            th:value="${tag.id}"
+                    ></option>
+                  </select>
+
                   </div>
                 </li>
                 <li

@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 *.mv.db
+*.trace.db
 
 ### STS ###
 .apt_generated
@@ -32,3 +33,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+docker-content/
+requests/*.json
+.ipynb_checkpoints

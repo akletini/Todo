@@ -19,7 +19,7 @@ import java.util.*;
 public class TodoController {
 
     @Autowired
-    private TodoRepository repo;
+    private TodoRepository todoRepo;
     @Autowired
     private TagRepository tagRepo;
 
@@ -63,7 +63,7 @@ public class TodoController {
             }
         }
 
-        if(currentSort == 1) {
+        if(currentSort == 2) {
             sortByCreatedAt((List<Todo>) model.getAttribute("todos"));
         } else {
             sortByDueDate((List<Todo>) model.getAttribute("todos"));
@@ -152,23 +152,23 @@ public class TodoController {
         cloneTodo.setCreatedAt(formatter.format(date));
         cloneTodo.setCurrentState(Todo.State.OPEN.toString());
         cloneTodo.setDueAt(todo.getDueAt());
-        Todo savedTodo = repo.save(cloneTodo);
+        Todo savedTodo = todoRepo.save(cloneTodo);
         listHasBeenAltered = false;
         return "redirect:/";
     }
 
     @GetMapping("/completeTodo/{id}")
     public String completeTodo(@PathVariable long id) {
-        Todo todo = repo.findById(id).get();
+        Todo todo = todoRepo.findById(id).get();
         todo.setCurrentState(Todo.State.DONE.toString());
-        repo.save(todo);
+        todoRepo.save(todo);
         listHasBeenAltered = false;
         return "redirect:/";
     }
 
     @GetMapping("/deleteTodo/{id}")
     public String deleteTodo(@PathVariable long id) {
-        repo.deleteById(id);
+        todoRepo.deleteById(id);
         listHasBeenAltered = false;
         return "redirect:/";
     }
@@ -181,7 +181,7 @@ public class TodoController {
 
     @GetMapping("/editTodo/{id}")
     public String editTodo(Model model, @PathVariable Long id) {
-        Optional<Todo> todoOpt = repo.findById(id);
+        Optional<Todo> todoOpt = todoRepo.findById(id);
         Todo todo = todoOpt.get();
         model.addAttribute("todo", todo);
         model.addAttribute("tags", tagRepo.findAll());
@@ -194,15 +194,25 @@ public class TodoController {
         todo.setId(lastEditedTodo.getId());
         todo.setCreatedAt(lastEditedTodo.getCreatedAt());
         todo.setCurrentState(lastEditedTodo.getCurrentState());
-        replaceEditedItem((List<Todo>) repo.findAll(), todo);
-        repo.save(todo);
+        replaceEditedItem((List<Todo>) todoRepo.findAll(), todo);
+        todoRepo.save(todo);
+        return "redirect:/";
+    }
+
+    @GetMapping("/updateTag/{todoId}/{tagIndex}")
+    public String editTagForTodo(Model model, @PathVariable Long todoId, @PathVariable String tagIndex) {
+        List<Tag> allTags = (List<Tag>) tagRepo.findAll();
+        Tag tag = allTags.get(Integer.parseInt(tagIndex)- 1);
+        Todo todo = todoRepo.findById(todoId).get();
+        todo.setTag(tag);
+        todoRepo.save(todo);
         return "redirect:/";
     }
 
     /* Queries */
 
     public List<Todo> getAllOpenTodos() {
-        List<Todo> allTodos = (ArrayList<Todo>) repo.findAll();
+        List<Todo> allTodos = (ArrayList<Todo>) todoRepo.findAll();
         this.allTodos = allTodos;
         List<Todo> openTodos = new ArrayList<>();
         for(Todo todo : allTodos){
@@ -266,7 +276,7 @@ public class TodoController {
     }
 
     public List<Todo> filterByCompleted(){
-        List<Todo> allTodos = (ArrayList<Todo>) repo.findAll();
+        List<Todo> allTodos = (ArrayList<Todo>) todoRepo.findAll();
         List<Todo> returnList = new ArrayList<>();
         for(Todo t : allTodos){
             if(t.getCurrentState().equals("DONE")){
