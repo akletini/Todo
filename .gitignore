@@ -37,3 +37,5 @@ build/
 docker-content/
 requests/*.json
 .ipynb_checkpoints
+tokens/
+src/main/resources/credentials.json

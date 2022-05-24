@@ -4,6 +4,7 @@ import com.todo.Todo.entity.Tag;
 import com.todo.Todo.entity.TagRepository;
 import com.todo.Todo.entity.Todo;
 import com.todo.Todo.entity.TodoRepository;
+import com.todo.Todo.service.GoogleCalendarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,9 @@ public class TodoController {
     private TodoRepository todoRepo;
     @Autowired
     private TagRepository tagRepo;
+
+    @Autowired
+    private GoogleCalendarService calendarService;
 
     private Todo lastEditedTodo;
     private boolean listHasBeenAltered = false;
@@ -153,6 +157,7 @@ public class TodoController {
         cloneTodo.setCurrentState(Todo.State.OPEN.toString());
         cloneTodo.setDueAt(todo.getDueAt());
         Todo savedTodo = todoRepo.save(cloneTodo);
+        calendarService.createEvent(savedTodo);
         listHasBeenAltered = false;
         return "redirect:/";
     }
@@ -162,6 +167,7 @@ public class TodoController {
         Todo todo = todoRepo.findById(id).get();
         todo.setCurrentState(Todo.State.DONE.toString());
         todoRepo.save(todo);
+        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar());
         listHasBeenAltered = false;
         return "redirect:/";
     }
@@ -196,6 +202,7 @@ public class TodoController {
         todo.setCurrentState(lastEditedTodo.getCurrentState());
         replaceEditedItem((List<Todo>) todoRepo.findAll(), todo);
         todoRepo.save(todo);
+        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar());
         return "redirect:/";
     }
 
@@ -206,12 +213,13 @@ public class TodoController {
         Todo todo = todoRepo.findById(todoId).get();
         todo.setTag(tag);
         todoRepo.save(todo);
+        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar());
         return "redirect:/";
     }
 
     /* Queries */
 
-    public List<Todo> getAllOpenTodos() {
+    private List<Todo> getAllOpenTodos() {
         List<Todo> allTodos = (ArrayList<Todo>) todoRepo.findAll();
         this.allTodos = allTodos;
         List<Todo> openTodos = new ArrayList<>();
@@ -223,7 +231,7 @@ public class TodoController {
         return openTodos;
     }
 
-    public List<Todo> filterTodosByTag(List<Todo> todos, long tagId) {
+    private List<Todo> filterTodosByTag(List<Todo> todos, long tagId) {
         List<Todo> filteredList = new ArrayList<>();
         for (Todo todo : todos) {
             if (todo.getTag() != null && todo.getTag().getId().equals(tagId)) {
@@ -233,7 +241,7 @@ public class TodoController {
         return filteredList;
     }
 
-    public List<Todo> sortByCreatedAt(List<Todo> todos) {
+    private List<Todo> sortByCreatedAt(List<Todo> todos) {
         todos.sort(new Comparator<Todo>() {
             @Override
             public int compare(Todo o1, Todo o2) {
@@ -251,7 +259,7 @@ public class TodoController {
         return todos;
     }
 
-    public List<Todo> sortByDueDate(List<Todo> todos) {
+    private List<Todo> sortByDueDate(List<Todo> todos) {
         todos.sort(new Comparator<Todo>() {
             @Override
             public int compare(Todo o1, Todo o2) {
@@ -264,7 +272,7 @@ public class TodoController {
         return todos;
     }
 
-    public List<Todo> filterByActive(){
+    private List<Todo> filterByActive(){
         List<Todo> todos = getAllOpenTodos();
         List<Todo> returnList = new ArrayList<>();
         for(Todo t : todos){
@@ -275,7 +283,7 @@ public class TodoController {
         return returnList;
     }
 
-    public List<Todo> filterByCompleted(){
+    private List<Todo> filterByCompleted(){
         List<Todo> allTodos = (ArrayList<Todo>) todoRepo.findAll();
         List<Todo> returnList = new ArrayList<>();
         for(Todo t : allTodos){
@@ -286,7 +294,7 @@ public class TodoController {
         return returnList;
     }
 
-    public List<Todo> filterByIsDue(List<Todo> todos){
+    private List<Todo> filterByIsDue(List<Todo> todos){
         List<Todo> returnList = new ArrayList<>();
         for(Todo t : todos){
             LocalDate dueDate = LocalDate.parse(t.getDueAt());
@@ -298,7 +306,7 @@ public class TodoController {
         return returnList;
     }
 
-    public void replaceEditedItem(List<Todo> currentTodos, Todo editedTodo){
+    private void replaceEditedItem(List<Todo> currentTodos, Todo editedTodo){
         int todoIndex = 0;
         for (Todo todo: currentTodos) {
             if(todo.getId().equals(editedTodo.getId())){

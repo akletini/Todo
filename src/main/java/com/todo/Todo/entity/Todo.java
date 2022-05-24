@@ -16,6 +16,7 @@ public class Todo {
     private String title;
     private String createdAt;
     private String dueAt;
+    @Column(columnDefinition = "LONGTEXT")
     private String description;
     private File attachedFile;
     @OneToOne
