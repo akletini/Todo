@@ -2,21 +2,16 @@ package com.todo.Todo.service;
 
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
 import com.todo.Todo.entity.Todo;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +22,7 @@ import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class GoogleCalendarService {
@@ -46,9 +38,7 @@ public class GoogleCalendarService {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
-            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
-            credential.setAccessToken(client.getAccessToken().getTokenValue());
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(client))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -69,13 +59,12 @@ public class GoogleCalendarService {
         }
     }
 
-    public List<Task> getTasksFromGoogleCalendar(@RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
+    public List<Task> getTasksFromGoogleCalendar(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient client) {
         List<Task> items = new ArrayList<>();
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
-            credential.setAccessToken(client.getAccessToken().getTokenValue());
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(client))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -88,13 +77,12 @@ public class GoogleCalendarService {
         return items;
     }
 
-    public void updateTaskInCalendar(Todo todo, List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
+    public void updateTaskInCalendar(Todo todo, List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient client) {
         List<Task> items = new ArrayList<>();
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
-            credential.setAccessToken(client.getAccessToken().getTokenValue());
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(client))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -118,13 +106,11 @@ public class GoogleCalendarService {
         }
     }
 
-    public void deleteTaskInCalendar(Todo todo,  List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
+    public void deleteTaskInCalendar(Todo todo,  List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient client) {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
-            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
-            credential.setAccessToken(client.getAccessToken().getTokenValue());
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(client))
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -156,24 +142,10 @@ public class GoogleCalendarService {
         return description;
     }
 
-    private Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
-        // Load client secrets.
-        InputStream in = GoogleCalendarService.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
-        }
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                .setAccessType("offline")
-                .setApprovalPrompt("force")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential userCredential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-        userCredential.refreshToken();
-        return userCredential;
+    private Credential getCredentials(OAuth2AuthorizedClient client) {
+        Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
+        credential.setAccessToken(client.getAccessToken().getTokenValue());
+        return credential;
     }
+
 }
