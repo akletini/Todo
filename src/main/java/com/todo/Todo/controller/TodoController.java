@@ -6,6 +6,8 @@ import com.todo.Todo.entity.Todo;
 import com.todo.Todo.entity.TodoRepository;
 import com.todo.Todo.service.GoogleCalendarService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -147,7 +149,7 @@ public class TodoController {
 
     // CRUD endpoints
     @PostMapping("/addTodo")
-    public String addTodo(Todo todo) {
+    public String addTodo(Todo todo, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         Todo cloneTodo = new Todo();
         cloneTodo.setTitle(todo.getTitle());
         cloneTodo.setDescription(todo.getDescription());
@@ -157,17 +159,17 @@ public class TodoController {
         cloneTodo.setCurrentState(Todo.State.OPEN.toString());
         cloneTodo.setDueAt(todo.getDueAt());
         Todo savedTodo = todoRepo.save(cloneTodo);
-        calendarService.createEvent(savedTodo);
+        calendarService.createEvent(savedTodo, client);
         listHasBeenAltered = false;
         return "redirect:/";
     }
 
     @GetMapping("/completeTodo/{id}")
-    public String completeTodo(@PathVariable long id) {
+    public String completeTodo(@PathVariable long id, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         Todo todo = todoRepo.findById(id).get();
         todo.setCurrentState(Todo.State.DONE.toString());
         todoRepo.save(todo);
-        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar());
+        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar(client), client);
         listHasBeenAltered = false;
         return "redirect:/";
     }
@@ -196,24 +198,26 @@ public class TodoController {
     }
 
     @PostMapping("/editTodo")
-    public String editTodo(Todo todo, @RequestParam("file") MultipartFile image) {
+    public String editTodo(Todo todo, @RequestParam("file") MultipartFile image,
+                           @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         todo.setId(lastEditedTodo.getId());
         todo.setCreatedAt(lastEditedTodo.getCreatedAt());
         todo.setCurrentState(lastEditedTodo.getCurrentState());
         replaceEditedItem((List<Todo>) todoRepo.findAll(), todo);
         todoRepo.save(todo);
-        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar());
+        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar(client), client);
         return "redirect:/";
     }
 
     @GetMapping("/updateTag/{todoId}/{tagIndex}")
-    public String editTagForTodo(Model model, @PathVariable Long todoId, @PathVariable String tagIndex) {
+    public String editTagForTodo(Model model, @PathVariable Long todoId, @PathVariable String tagIndex,
+                                 @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         List<Tag> allTags = (List<Tag>) tagRepo.findAll();
         Tag tag = allTags.get(Integer.parseInt(tagIndex)- 1);
         Todo todo = todoRepo.findById(todoId).get();
         todo.setTag(tag);
         todoRepo.save(todo);
-        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar());
+        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar(client), client);
         return "redirect:/";
     }
 

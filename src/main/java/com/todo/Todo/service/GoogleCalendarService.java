@@ -1,5 +1,6 @@
 package com.todo.Todo.service;
 
+import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -11,15 +12,12 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
-import com.google.api.services.tasks.model.TaskList;
-import com.google.api.services.tasks.model.TaskLists;
 import com.todo.Todo.entity.Todo;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -58,15 +56,21 @@ public class GoogleCalendarService {
                 HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
+                .setApprovalPrompt("force")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        Credential userCredential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        userCredential.refreshToken();
+        return userCredential;
     }
 
-    public void createEvent(Todo todo) {
+    public void createEvent(Todo todo, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+
+            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
+            credential.setAccessToken(client.getAccessToken().getTokenValue());
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -87,11 +91,13 @@ public class GoogleCalendarService {
         }
     }
 
-    public List<Task> getTodosFromGoogleCalendar() {
+    public List<Task> getTodosFromGoogleCalendar(@RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         List<Task> items = new ArrayList<>();
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
+            credential.setAccessToken(client.getAccessToken().getTokenValue());
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -104,11 +110,13 @@ public class GoogleCalendarService {
         return items;
     }
 
-    public void updateTaskInCalendar(Todo todo, List<Task> tasks) {
+    public void updateTaskInCalendar(Todo todo, List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         List<Task> items = new ArrayList<>();
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+            Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
+            credential.setAccessToken(client.getAccessToken().getTokenValue());
+            Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
 
@@ -126,58 +134,6 @@ public class GoogleCalendarService {
 
         } catch (IOException | GeneralSecurityException e) {
             System.err.println(e.getMessage());
-        }
-    }
-
-    public void printTasks() throws GeneralSecurityException, IOException {
-        // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Tasks service = new Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-
-        // Print the first 10 task lists.
-        TaskLists result = service.tasklists().list()
-                .setMaxResults(10)
-                .execute();
-        List<TaskList> taskLists = result.getItems();
-        if (taskLists == null || taskLists.isEmpty()) {
-            System.out.println("No task lists found.");
-        } else {
-            System.out.println("Task lists:");
-            for (TaskList tasklist : taskLists) {
-                System.out.printf("%s (%s)\n", tasklist.getTitle(), tasklist.getId());
-            }
-        }
-    }
-
-    public void printEvents() throws IOException, GeneralSecurityException {
-        // Build a new authorized API client service.
-        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-        Calendar service = new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
-                .setApplicationName(APPLICATION_NAME)
-                .build();
-
-        // List the next 10 events from the primary calendar.
-        DateTime now = new DateTime(System.currentTimeMillis());
-        Events events = service.events().list("primary")
-                .setMaxResults(10)
-                .setTimeMin(now)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-        List<Event> items = events.getItems();
-        if (items.isEmpty()) {
-            System.out.println("No upcoming events found.");
-        } else {
-            System.out.println("Upcoming events");
-            for (Event event : items) {
-                DateTime start = event.getStart().getDateTime();
-                if (start == null) {
-                    start = event.getStart().getDate();
-                }
-                System.out.printf("%s (%s)\n", event.getSummary(), start);
-            }
         }
     }
 
