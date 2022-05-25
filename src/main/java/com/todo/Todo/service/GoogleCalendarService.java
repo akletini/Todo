@@ -11,14 +11,12 @@ import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
 import com.todo.Todo.entity.Todo;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +32,7 @@ public class GoogleCalendarService {
     private static final List<String> SCOPES = Collections.singletonList(TasksScopes.TASKS);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
+    @Async
     public void createTask(Todo todo, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -59,6 +58,7 @@ public class GoogleCalendarService {
         }
     }
 
+
     public List<Task> getTasksFromGoogleCalendar(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient client) {
         List<Task> items = new ArrayList<>();
         try {
@@ -76,7 +76,7 @@ public class GoogleCalendarService {
         }
         return items;
     }
-
+    @Async
     public void updateTaskInCalendar(Todo todo, List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient client) {
         List<Task> items = new ArrayList<>();
         try {
@@ -106,6 +106,7 @@ public class GoogleCalendarService {
         }
     }
 
+    @Async
     public void deleteTaskInCalendar(Todo todo,  List<Task> tasks, @RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient client) {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
