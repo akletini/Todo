@@ -25,7 +25,6 @@ public class TodoController {
     private TodoRepository todoRepo;
     @Autowired
     private TagRepository tagRepo;
-
     @Autowired
     private GoogleCalendarService calendarService;
 
@@ -159,7 +158,7 @@ public class TodoController {
         cloneTodo.setCurrentState(Todo.State.OPEN.toString());
         cloneTodo.setDueAt(todo.getDueAt());
         Todo savedTodo = todoRepo.save(cloneTodo);
-        calendarService.createEvent(savedTodo, client);
+        calendarService.createTask(savedTodo, client);
         listHasBeenAltered = false;
         return "redirect:/";
     }
@@ -169,13 +168,15 @@ public class TodoController {
         Todo todo = todoRepo.findById(id).get();
         todo.setCurrentState(Todo.State.DONE.toString());
         todoRepo.save(todo);
-        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar(client), client);
+        calendarService.updateTaskInCalendar(todo, calendarService.getTasksFromGoogleCalendar(client), client);
         listHasBeenAltered = false;
         return "redirect:/";
     }
 
     @GetMapping("/deleteTodo/{id}")
-    public String deleteTodo(@PathVariable long id) {
+    public String deleteTodo(@PathVariable long id, @RegisteredOAuth2AuthorizedClient("google")OAuth2AuthorizedClient client) {
+        Todo todo = todoRepo.findById(id).get();
+        calendarService.deleteTaskInCalendar(todo, calendarService.getTasksFromGoogleCalendar(client), client);
         todoRepo.deleteById(id);
         listHasBeenAltered = false;
         return "redirect:/";
@@ -205,7 +206,7 @@ public class TodoController {
         todo.setCurrentState(lastEditedTodo.getCurrentState());
         replaceEditedItem((List<Todo>) todoRepo.findAll(), todo);
         todoRepo.save(todo);
-        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar(client), client);
+        calendarService.updateTaskInCalendar(todo, calendarService.getTasksFromGoogleCalendar(client), client);
         return "redirect:/";
     }
 
@@ -217,7 +218,7 @@ public class TodoController {
         Todo todo = todoRepo.findById(todoId).get();
         todo.setTag(tag);
         todoRepo.save(todo);
-        calendarService.updateTaskInCalendar(todo, calendarService.getTodosFromGoogleCalendar(client), client);
+        calendarService.updateTaskInCalendar(todo, calendarService.getTasksFromGoogleCalendar(client), client);
         return "redirect:/";
     }
 
