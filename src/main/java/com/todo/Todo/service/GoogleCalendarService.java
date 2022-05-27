@@ -2,6 +2,7 @@ package com.todo.Todo.service;
 
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -45,9 +46,6 @@ public class GoogleCalendarService {
             task.setTitle(todo.getTitle());
             task.setKind("tasks#task");
             Date date = new SimpleDateFormat("yyyy-MM-dd").parse(todo.getDueAt());
-            java.util.Calendar c = java.util.Calendar.getInstance();
-            c.add(java.util.Calendar.HOUR, -1);
-            date = c.getTime();
             task.setDue(new DateTime(date).toStringRfc3339());
 
             service.tasks().insert(TODO_TASK_ID, task).execute();
@@ -146,6 +144,9 @@ public class GoogleCalendarService {
     private Credential getCredentials(OAuth2AuthorizedClient client) {
         Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
         credential.setAccessToken(client.getAccessToken().getTokenValue());
+        if (client.getRefreshToken() != null) {
+            credential.setRefreshToken(client.getRefreshToken().getTokenValue());
+        }
         return credential;
     }
 
